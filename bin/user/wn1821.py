@@ -29,7 +29,7 @@ import time
 import weewx.drivers
 
 DRIVER_NAME = 'WN1821'
-DRIVER_VERSION = "0.1"
+DRIVER_VERSION = "0.2"
 
 log = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class WN1821(weewx.drivers.AbstractDevice):
                     for channel in data["ch_aisle"]:
                         channel_number = channel["channel"]
                         if channel_number not in [str(i) for i in range(1, 9)]:  # Allow only channels 1 to 8
-                            log.warning(f"Ignoring invalid channel: {channel_number}")
+                            log.warning(f"Ignoring invalid ch_aisle channel: {channel_number}")
                             continue
                         _packet[f"extraTemp{channel_number}"] = float(channel["temp"])
                         _packet[f"extraHumid{channel_number}"] = int(channel["humidity"].strip('%'))
@@ -119,7 +119,19 @@ class WN1821(weewx.drivers.AbstractDevice):
                         # Map the lowest temperature channel to outTemp and outHumidity
                         if lowest_temp_channel:
                             _packet["outTemp"] = float(lowest_temp_channel["temp"])
-                            _packet["outHumidity"] = int(lowest_temp_channel["humidity"].strip('%'))         
+                            _packet["outHumidity"] = int(lowest_temp_channel["humidity"].strip('%'))
+
+                # Extract channel data (ch_ec)
+                if "ch_ec" in data:
+                    for channel in data["ch_ec"]:
+                        channel_number = channel["channel"]
+                        if channel_number not in [str(i) for i in range(1, 5)]:  # Allow only channels 1 to 4
+                            log.warning(f"Ignoring invalid ch_ec channel: {channel_number}")
+                            continue
+                        _packet[f"soilTemp{channel_number}"] = float(channel["temp"])
+                        _packet[f"soilMoist{channel_number}"] = int(channel["humidity"].strip('%'))
+                        _packet[f"soilEC{channel_number}"] = int(channel["ec"].strip(' uS/cm'))
+                        _packet[f"soilBatt{channel_number}"] = int(channel["battery"])
 
                 # Add a timestamp
                 _packet["dateTime"] = int(time.time())

@@ -11,7 +11,7 @@ def loader():
 class WN1821Installer(ExtensionInstaller):
     def __init__(self):
         super(WN1821Installer, self).__init__(
-            version="0.1",
+            version="0.2",
             name='wn1821',
             description='WN1821 API driver for weewx.',
             author="Tomáš Filo",
